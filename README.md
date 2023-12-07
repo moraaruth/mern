@@ -8,3 +8,4 @@ mern
 ## const { graphQlHTTP } = require('express-graphql')
 ## sampleData
 ## schema
+## connecting to mongodb
