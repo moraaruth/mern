@@ -9,3 +9,11 @@ mern
 ## sampleData
 ## schema
 ## connecting to mongodb
+## mutations
+### query a list of clients
+### add client
+### delete client
+### query a list of projects
+### add project
+### update project
+### delete project
