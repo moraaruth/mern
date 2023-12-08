@@ -117,33 +117,63 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { FaTrash, FaUser } from 'react-icons/fa'
 import { GET_CLIENTS } from '../../queries/clients'
-import { DELETE_CLIENT } from '../../mutations/clientMutation'
+import { DELETE_CLIENT, ADD_CLIENT } from '../../mutations/clientMutation'
 import { useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
+import { cache } from '@babel/traverse';
 
 
 
 const GamesPage = () => {
   const { loading, error, data, refetch } = useQuery(GET_CLIENTS, { client: apolloClient });
   const [deleteClient] = useMutation(DELETE_CLIENT, { client: apolloClient });
+  const [addClient] = useMutation(ADD_CLIENT, { 
+    client: apolloClient,
+    update: (cache, { data: { addClient: newClient } }) => {
+      const { clients } = cache.readQuery({ query: GET_CLIENTS });
+      cache.writeQuery({
+        query: GET_CLIENTS,
+        data: { clients: clients.concat([newClient]) },
+      });
+    }
+  });
+    ;
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [showModal, setShowModal] = useState(false);
 
-
-  const onSubmit = (e: any) => {
+  const onSubmit = async (e: any) => {
     e.preventDefault();
-    console.log(name, email, phone)
-    setName('');
-    setEmail('');
-    setPhone('');
-    setShowModal(false);
-
-  }
+    if (name === '' || email === '' || phone === '') {
+      return alert('Please fill all fields');
+    }
+  
+    try {
+      const result = await addClient({
+        variables: {
+          name: name,
+          email: email,
+          phone: phone
+        }
+      });
+  
+      // Handle the result here, check if the mutation was successful
+      console.log('Mutation Result:', result);
+  
+      setName('');
+      setEmail('');
+      setPhone('');
+      setShowModal(false);
+    } catch (error) {
+      // Handle errors from the mutation
+      console.error('Mutation Error:', error);
+      // Display an error message to the user if needed
+      alert('Failed to add client. Please try again.');
+    }
+  };
 
   const handleDelete = async (id: any) => {
     try {
